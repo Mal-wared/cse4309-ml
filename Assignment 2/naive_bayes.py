@@ -96,7 +96,9 @@ def calculate_stdevs(training_data):
 def calculate_gaussian(training_data, test_data):
     calculate_means(training_data)
     calculate_stdevs(training_data)
+    accuracy_sum = 0
     for id in test_data:
+        class_probabilities = {}
         for class_label in range(1, 11):
             total_probability = np.log(training_data[class_label]["probability"])
             for attribute in range(1, 9):
@@ -110,18 +112,19 @@ def calculate_gaussian(training_data, test_data):
                     gaussian_likelihood = 1E-9
                 log_gaussian_likelihood = np.log(gaussian_likelihood)
                 total_probability += log_gaussian_likelihood 
-                #print(training_data[class_label]["probability"])
-            test_data[id][class_label] = np.exp(total_probability)
+            class_probabilities[class_label] = np.exp(total_probability)
 
-        best_likelihood = {"class" : -1, "likelihood" : -1.0}
-        for class_label in range(1, 11):
-            if test_data[id][class_label] > best_likelihood["likelihood"]:
-                best_likelihood["class"] = class_label
-                best_likelihood["likelihood"] = test_data[id][class_label]
+        evidence = sum(class_probabilities.values())
+        best_likelihood_class = max(class_probabilities, key=class_probabilities.get)
+        best_likelihood = 0
+        if evidence > 0:
+            best_likelihood = class_probabilities[best_likelihood_class] / evidence
         true_class = test_data[id]["data"][8]
-        #print(test_data[id])
         accuracy = 0.0
-        if true_class == best_likelihood["class"]:
+        if true_class == best_likelihood_class:
             accuracy = 1.0
-        print(f"ID={id : 5d}, predicted={best_likelihood["class"] : 3d}, probability = {best_likelihood["likelihood"] : .4f}, true={true_class}, accuracy={accuracy : 4.2f}")
+        print(f"ID={id : 5d}, predicted={best_likelihood_class : 3d}, probability = {best_likelihood : .4f}, true={true_class}, accuracy={accuracy : 4.2f}")
+        accuracy_sum += accuracy
+    overall_accuracy = accuracy_sum / len(test_data)
+    print(f"classification accuracy={overall_accuracy : 6.4f}")
     
