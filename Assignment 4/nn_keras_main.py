@@ -14,7 +14,7 @@ dataset = "pendigits_string"
 # When you test your code, you can select the hyperparameters you want to use 
 # by modifying the next lines
 layers = 4
-units_per_layer = 50
+units_per_layer = 40
 epochs = 20
 
 # Here we call your function.
