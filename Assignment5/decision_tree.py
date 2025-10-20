@@ -98,6 +98,7 @@ def build_tree(data, labels, node_id, pruning_thr, option):
     if len(labels) < pruning_thr:
         classes, counts = np.unique(labels, return_counts = True)
         node.predicted_class = classes[np.argmax(counts)]
+        return node
     
     # Step 2: Find best split
     feature_id_1based, threshold, gain = find_best_split(data, labels, option)
@@ -130,6 +131,20 @@ def build_tree(data, labels, node_id, pruning_thr, option):
 
     return node
 
+def classify_object(node, test_object):
+    # recursively traverses tree to find a predicted class
+
+    # base case: leaf node
+    if node.predicted_class is not None:
+        return node.predicted_class
+    
+    feature_value = test_object[node.feature_id - 1]
+
+    if feature_value < node.threshold:
+        return classify_object(node.left_child, test_object)
+    else:
+        return classify_object(node.right_child, test_object)
+
 
 def decision_tree(training_file, test_file, option, pruning_thr):
     # Step 1: Loading the data
@@ -144,6 +159,14 @@ def decision_tree(training_file, test_file, option, pruning_thr):
     X_test_raw = raw_test_data[:, :-1].astype(float)
     Y_test_raw = raw_test_data[:, -1]
 
+    all_labels = np.unique(np.concatenate((Y_train_raw, Y_test_raw)))
+    
+    # Create mapping from string label to integer
+    label_to_int = {label: i for i, label in enumerate(all_labels)}
+
+    Y_train = np.array([label_to_int[label] for label in Y_train_raw])
+    Y_test = np.array([label_to_int[label] for label in Y_test_raw])
+
     # Step 2: Training Stage
     # - Building tree 
     forest = []
@@ -154,7 +177,7 @@ def decision_tree(training_file, test_file, option, pruning_thr):
         num_trees = int(option)
     
     for i in range(1, num_trees + 1):
-        root_node = build_tree(X_train_raw, Y_train_raw, 1, pruning_thr, option)
+        root_node = build_tree(X_train_raw, Y_train, 1, pruning_thr, option)
         forest.append((root_node, i))
 
     # Step 3: Training Output (BFS)
@@ -178,6 +201,52 @@ def decision_tree(training_file, test_file, option, pruning_thr):
             
             if current_node.right_child:
                 queue.append(current_node.right_child)
-                
+    
+    # Step 4: Classification Stage
+
+    total_acc = 0.0
+    object_id = 1
+
+    for test_object, true_class in zip(X_test_raw, Y_test):
+        votes = {}
+
+        # get votes from every tree in forest
+        for root_node, tree_id in forest:
+            predicted_class = classify_object(root_node, test_object)
+            votes[predicted_class] = votes.get(predicted_class, 0) + 1
+
+        max_votes = -1
+        tied_classes = []
+
+        for cls, count in votes.items():
+            if count > max_votes:
+                max_votes = count
+                tied_classes = [cls]
+            elif count == max_votes:
+                tied_classes.append(cls)
+
+        final_prediction = random.choice(tied_classes)
+
+        accuracy = 0.0
+
+        if true_class in tied_classes:
+            accuracy = 1.0 / len(tied_classes)
+        else:
+            accuracy = 0.0
+
+        total_acc += accuracy
+
+        print('ID=%5d, predicted=%3d, true=%3d, accuracy=%4.2f' % 
+          (object_id, 
+           int(float(final_prediction)), 
+           int(float(true_class)), 
+           accuracy))
+        
+        object_id += 1
+
+        # Step 5: Final Accuracy Output
+    classification_acc = total_acc / len(Y_test_raw)
+    print('classification accuracy=%6.4f' % (classification_acc))
+
     return
 
