@@ -236,11 +236,11 @@ def decision_tree(training_file, test_file, option, pruning_thr):
 
         total_acc += accuracy
 
-        print('ID=%5d, predicted=%3d, true=%3d, accuracy=%4.2f' % 
+        '''print('ID=%5d, predicted=%3d, true=%3d, accuracy=%4.2f' % 
           (object_id, 
            int(float(final_prediction)), 
            int(float(true_class)), 
-           accuracy))
+           accuracy))'''
         
         object_id += 1
 
@@ -248,5 +248,4 @@ def decision_tree(training_file, test_file, option, pruning_thr):
     classification_acc = total_acc / len(Y_test_raw)
     print('classification accuracy=%6.4f' % (classification_acc))
 
-    return
-
+    return classification_acc
