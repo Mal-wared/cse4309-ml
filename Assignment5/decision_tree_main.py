@@ -7,13 +7,13 @@ import time
 
 # When you test your code, you can change this line to reflect where the 
 # dataset directory is located on your machine.
-dataset_directory = r"C:\Users\malwa\GitHub Repos\cse4309\Assignment5"
+dataset_directory = r"C:\Users\malwa\Documents\GitHub Repos\Fall 2025 (Current)\cse4309\Assignment5"
 
 # When you test your code, you can select the dataset you want to use 
 # by modifying the next lines
-dataset = "pendigits_string"
+#dataset = "pendigits_string"
 #dataset = "satellite"
-#dataset = "yeast"
+dataset = "yeast"
 
 
 training_file = dataset_directory + "/" + dataset + "_training.txt"
@@ -97,8 +97,9 @@ def run_experiment(training_file, test_file, option, pruning_thr, runs=15):
     else:
         print("\n--- Experiment Failed ---")
         print("No accuracy results were captured.")
-
+decision_tree(training_file, test_file, option, pruning_thr)
 if __name__ == "__main__":
+    '''
     
     if len(sys.argv) != 5:
         print("Usage: python decision_tree_main.py <training_file> <test_file> <option> <pruning_thr>")
@@ -112,7 +113,6 @@ if __name__ == "__main__":
     # For 'optimized', we only need to run it once since it's deterministic
     num_runs = 1 if option_arg == 'optimized' else 15
 
-    run_experiment(training_file, test_file, option_arg, pruning_thr_arg, runs=num_runs)
+    #run_experiment(training_file, test_file, option_arg, pruning_thr_arg, runs=num_runs)
     
-
-    #decision_tree(training_file, test_file, option, pruning_thr)
+    '''
